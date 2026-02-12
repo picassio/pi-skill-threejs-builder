@@ -1,0 +1,11 @@
+{
+  "name": "pi-skill-threejs-builder",
+  "version": "1.0.0",
+  "description": "Pi skill for creating Three.js web apps with scene setup, lighting, geometries, materials, animations, GLTF loading, game patterns, and more.",
+  "keywords": ["pi-package", "threejs", "three.js", "3d", "webgl", "skill"],
+  "license": "MIT",
+  "type": "module",
+  "pi": {
+    "skills": ["./skills"]
+  }
+}
