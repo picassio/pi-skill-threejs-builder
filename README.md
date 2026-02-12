@@ -30,14 +30,14 @@ Includes a reusable ES module (`gltf-calibration-helpers.mjs`) that visualizes a
 ## Install
 
 ```bash
-# From git
-pi install https://github.com/<your-username>/pi-skill-threejs-builder
+# From git (global)
+pi install https://github.com/picassio/pi-skill-threejs-builder
+
+# Project-local install (shared with team via .pi/settings.json)
+pi install -l https://github.com/picassio/pi-skill-threejs-builder
 
 # From a local clone
 pi install /path/to/pi-skill-threejs-builder
-
-# Project-local install
-pi install -l https://github.com/<your-username>/pi-skill-threejs-builder
 ```
 
 ## Usage
