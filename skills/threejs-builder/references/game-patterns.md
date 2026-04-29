@@ -365,6 +365,49 @@ class ObjectPool {
 
 ---
 
+## Fixed Game Camera (Not OrbitControls)
+
+For side-scrollers and fixed-view games:
+
+```javascript
+// Simple side-view camera
+function setupGameCamera() {
+    const camera = new THREE.PerspectiveCamera(45, 960/540, 0.1, 100);
+    camera.position.set(2, 5, 16);
+    camera.lookAt(2, 1, 0);
+    return camera;
+}
+
+// Cinematic variant with slight tilt
+function setupCinematicCamera() {
+    const camera = new THREE.PerspectiveCamera(50, 960/540, 0.1, 100);
+    camera.position.set(0, 8, 14);
+    camera.lookAt(2, 1, 0);
+    camera.rotation.z = 0.03; // Slight Dutch angle
+    return camera;
+}
+
+// Toggle between camera modes
+let cinematicMode = false;
+const cameraPositions = {
+    simple: { x: 2, y: 5, z: 16, fov: 45, tilt: 0 },
+    cinematic: { x: 0, y: 8, z: 14, fov: 50, tilt: 0.03 }
+};
+
+function toggleCameraMode() {
+    cinematicMode = !cinematicMode;
+    const pos = cinematicMode ? cameraPositions.cinematic : cameraPositions.simple;
+
+    camera.position.set(pos.x, pos.y, pos.z);
+    camera.fov = pos.fov;
+    camera.rotation.z = pos.tilt;
+    camera.updateProjectionMatrix();
+    camera.lookAt(2, 1, 0);
+}
+```
+
+---
+
 ## Near-Miss Detection
 
 ```javascript
@@ -419,6 +462,25 @@ function showFloatingText(text, color, x = '50%', y = '35%') {
 
 ---
 
+## Best Practices Summary
+
+| Pattern | When to Use |
+|---------|-------------|
+| Animation state management | Characters with multiple animations |
+| Animation selection filtering | Avoid death/error animations as default |
+| Facing direction rotation | Side-scrollers with GLTF models |
+| Game state machine | Any game with menu/play/pause/gameover |
+| Time scaling | Slow-mo for impact moments |
+| Screen shake | Death, heavy impacts |
+| Screen flash | Near-miss, milestones, damage |
+| Squash & stretch | Jump, land, any snappy motion |
+| Parallax layers | Scrolling games with depth |
+| Object pooling | Spawning many objects (obstacles, particles) |
+| Fixed camera | Games (not model viewers) |
+| Near-miss detection | Rewarding close calls |
+
+---
+
 ## Anti-Patterns
 
 ❌ **Creating objects in the game loop** — memory leak, GC stalls
@@ -426,3 +488,9 @@ function showFloatingText(text, color, x = '50%', y = '35%') {
 ❌ **Mixing real time and game time inconsistently** — score affected by slow-mo
 
 ❌ **Forgetting to clean up animation mixers** — remove from update list when entity is removed
+
+---
+
+## Deploying Games to iOS
+
+For deploying Three.js games to iOS via Capacitor (touch controls, SPM workflow, native sync), see [`capacitor-ios.md`](capacitor-ios.md).

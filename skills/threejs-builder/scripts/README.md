@@ -7,11 +7,9 @@ This skill includes a small ES-module you can copy into your project to make the
 Install into your project:
 
 ```bash
-python3 <path-to-this-skill>/scripts/install-gltf-calibration-helpers.py \
+python3 ~/.pi/agent/skills/threejs-builder/scripts/install-gltf-calibration-helpers.py \
   --out ./gltf-calibration-helpers.mjs
 ```
-
-The exact path depends on how the skill was installed. Use the skill directory as the base path.
 
 Use in your Three.js ES-module code:
 

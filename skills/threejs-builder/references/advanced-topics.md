@@ -2,11 +2,18 @@
 
 Progressive disclosure reference for topics beyond simple scenes.
 
-> **Note**: For GLTF models, see `gltf-loading-guide.md`. For game development patterns, see `game-patterns.md`.
+**Related guides:**
+- [`gltf-loading-guide.md`](gltf-loading-guide.md) - Loading, caching, and cloning 3D models
+- [`game-patterns.md`](game-patterns.md) - Game loops, screen effects, animation states, parallax
+- [`capacitor-ios.md`](capacitor-ios.md) - Deploying to iOS via Capacitor
 
 ---
 
 ## Loading 3D Models (GLTF/GLB)
+
+**→ See dedicated guide: [`gltf-loading-guide.md`](gltf-loading-guide.md)**
+
+For comprehensive GLTF loading patterns including basic loading, promise-based approaches, fallbacks, batch loading, caching, and troubleshooting, refer to the dedicated GLTF loading guide.
 
 Quick example using import maps:
 
@@ -55,9 +62,11 @@ Quick example using import maps:
 
 ## Post-Processing (Bloom, Depth of Field)
 
+**Key improvement: Import maps** resolve Three.js module paths correctly, avoiding long unpkg URLs. See the GLTF loading section above for setup.
+
 ```javascript
-import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-import { EffectComposer } from 'https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/EffectComposer.js';
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/UnrealBloomPass.js';
 
@@ -243,6 +252,41 @@ renderer.setAnimationLoop(() => {
     mesh.quaternion.copy(body.quaternion);
     renderer.render(scene, camera);
 });
+```
+
+---
+
+## Installation with npm
+
+For production apps, install Three.js via npm:
+
+```bash
+npm install three
+```
+
+```javascript
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// Same API as CDN version
+```
+
+---
+
+## TypeScript Support
+
+Three.js includes TypeScript definitions:
+
+```typescript
+import * as THREE from 'three';
+
+const scene: THREE.Scene = new THREE.Scene();
+const geometry: THREE.BoxGeometry = new THREE.BoxGeometry(1, 1, 1);
+const material: THREE.MeshStandardMaterial = new THREE.MeshStandardMaterial({
+    color: 0x44aa88
+});
+const cube: THREE.Mesh = new THREE.Mesh(geometry, material);
+scene.add(cube);
 ```
 
 ---

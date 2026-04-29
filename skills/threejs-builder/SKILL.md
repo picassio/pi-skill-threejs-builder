@@ -1,11 +1,6 @@
 ---
 name: threejs-builder
-description: >
-  Creates Three.js web apps with scene setup, lighting, geometries, materials,
-  animations, and responsive rendering. Use when the user asks to create a Three.js
-  scene, app, showcase, 3D web content, or any browser-based 3D graphics project.
-  Supports ES modules, modern Three.js r150+ APIs, GLTF model loading, game patterns,
-  post-processing, shaders, physics, and instancing.
+description: "Creates Three.js web apps with scene setup, lighting, geometries, materials, animations, and responsive rendering. Use when the user asks to create a Three.js scene, app, showcase, 3D web content, or any browser-based 3D graphics project. Supports ES modules, modern Three.js r150+ APIs, GLTF model loading, game patterns, post-processing, shaders, physics, instancing, and Capacitor iOS deployment.\n"
 ---
 
 # Three.js Builder
@@ -22,6 +17,7 @@ A focused skill for creating simple, performant Three.js web applications using 
 | **Reference Frames** | [reference-frame-contract.md](references/reference-frame-contract.md) | Calibration, anchoring, axis correctness, debugging |
 | **Game Development** | [game-patterns.md](references/game-patterns.md) | State machines, animation switching, parallax, object pooling |
 | **Advanced Topics** | [advanced-topics.md](references/advanced-topics.md) | Post-processing, shaders, physics, instancing |
+| **Capacitor iOS** | [capacitor-ios.md](references/capacitor-ios.md) | Deploying Three.js apps to iOS via Capacitor, SPM setup, native sync |
 | **Calibration Helpers** | [scripts/README.md](scripts/README.md) | GLTF calibration helper installation and usage |
 
 ---
@@ -400,6 +396,100 @@ Common hex colors:
 - Red: `0xff0000`, Green: `0x00ff00`, Blue: `0x0000ff`
 - Cyan: `0x00ffff`, Magenta: `0xff00ff`, Yellow: `0xffff00`
 - Orange: `0xff8800`, Purple: `0x8800ff`, Pink: `0xff0088`
+
+---
+
+## Animation Index Contract
+
+For projects with multiple characters and animations, use a JSON metadata contract to decouple UI/logic from raw GLB clip names.
+
+### Contract Shape (`assets_index.json`)
+
+```json
+{
+  "schemaVersion": 1,
+  "characters": {
+    "hero": {
+      "id": "hero",
+      "displayName": "Hero",
+      "skeleton": { "url": "/assets/glb/hero/hero_skeleton.glb" },
+      "animationSource": { "url": "/assets/glb/hero/hero_animations.glb" },
+      "animations": [
+        {
+          "id": "idle",
+          "displayName": "Idle",
+          "sourceClipName": "Armature|Idle",
+          "durationSec": 2.0,
+          "loop": "repeat",
+          "tags": ["idle"]
+        },
+        {
+          "id": "run",
+          "displayName": "Run",
+          "sourceClipName": "Armature|Run",
+          "durationSec": 0.8,
+          "loop": "repeat",
+          "tags": ["locomotion", "run"]
+        }
+      ],
+      "defaults": {
+        "defaultAnimationId": "idle",
+        "crossFadeSec": 0.2
+      }
+    }
+  }
+}
+```
+
+### Runtime Pattern
+
+```javascript
+// 1. Load index
+const indexResp = await fetch('/assets/assets_index.json');
+const index = await indexResp.json();
+const charData = index.characters.hero;
+
+// 2. Load skeleton and animation GLBs
+const skeleton = await loadGLTF(charData.skeleton.url);
+const animSource = await loadGLTF(charData.animationSource.url);
+
+// 3. Build action map from metadata
+const mixer = new THREE.AnimationMixer(skeleton.scene);
+const actions = {};
+
+for (const entry of charData.animations) {
+    const clip = animSource.animations.find(c => c.name === entry.sourceClipName);
+    if (!clip) {
+        console.warn(`Missing clip: ${entry.sourceClipName}`);
+        continue;
+    }
+    const action = mixer.clipAction(clip);
+    action.setLoop(
+        entry.loop === 'repeat' ? THREE.LoopRepeat :
+        entry.loop === 'once' ? THREE.LoopOnce : THREE.LoopPingPong
+    );
+    if (entry.loop === 'once') action.clampWhenFinished = true;
+    actions[entry.id] = action;
+}
+
+// 4. Play default
+const defaultId = charData.defaults.defaultAnimationId;
+if (actions[defaultId]) actions[defaultId].play();
+
+// 5. Generate UI buttons from metadata (not hardcoded)
+for (const entry of charData.animations) {
+    const btn = document.createElement('button');
+    btn.textContent = entry.displayName;
+    btn.onclick = () => switchToAction(actions[entry.id]);
+    uiContainer.appendChild(btn);
+}
+```
+
+**Why this matters:**
+- A renamed clip in GLB won't silently break UI
+- Animation buttons are generated from data, not hardcoded
+- Multiple characters share the same loading/UI pattern
+- Cross-fade timing is configurable per-character
 
 ---
 
